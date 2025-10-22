@@ -3,13 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Relatório de Visitas (Avançado)</title>
+    <title>Gerador de Relatório de Visitas (Responsivo)</title>
     <style>
-        /* Estilos Globais */
+        /* Variáveis CSS */
+        :root {
+            --cor-principal: #1e3a8a;
+            --cor-secundaria: #3b82f6;
+            --cor-sucesso: #10b981;
+            --cor-erro: #ef4444;
+            --cor-aviso: #fcd34d;
+        }
+
+        /* Estilos Globais e Reset Básico */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 1.5rem; /* Ajuste para celular */
             background-color: #eef2f7;
             color: #333;
         }
@@ -17,52 +26,51 @@
             max-width: 750px;
             margin: 0 auto;
             background-color: #ffffff;
-            padding: 30px;
+            padding: 1.5rem;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
         h1 {
             text-align: center;
-            color: #1e3a8a;
-            margin-bottom: 30px;
-            font-size: 2em;
+            color: var(--cor-principal);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem; /* Ajuste para celular */
         }
         h2 {
             text-align: center;
             color: #4b5563;
-            margin-top: 20px;
-            margin-bottom: 15px;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
             border-bottom: 2px solid #e5e7eb;
-            padding-bottom: 5px;
+            padding-bottom: 0.5rem;
+            font-size: 1.3rem; /* Ajuste para celular */
         }
         
-        /* Botões de Contagem (Estilo Aprimorado e Alinhamento) */
+        /* Botões de Contagem */
         .botoes-contagem {
             display: flex;
             justify-content: space-around;
-            margin-bottom: 30px;
-            gap: 20px;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
         }
         .botao-grupo {
             flex-grow: 1;
-            text-align: center;
-            display: flex; /* Adicionado para alinhar verticalmente */
-            flex-direction: column; /* Coloca os itens em coluna */
-            align-items: center; /* Centraliza horizontalmente */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         
         .botoes-incremento-decremento {
             display: flex;
-            align-items: center;
-            gap: 10px; /* Espaço entre os botões */
-            width: 100%; /* Ocupa a largura total do grupo */
-            max-width: 250px; /* Limite para botões */
-            margin-bottom: 10px;
+            align-items: stretch; /* Garante que os botões tenham a mesma altura */
+            gap: 0.5rem;
+            width: 100%; 
+            max-width: 250px; 
         }
 
         .botao-grupo button {
-            padding: 15px 10px; /* Ajustado para melhor proporção */
-            font-size: 1.2em;
+            padding: 0.8rem 0.5rem; 
+            font-size: 1rem; 
             font-weight: bold;
             cursor: pointer;
             border: none;
@@ -72,21 +80,19 @@
             flex-grow: 1;
         }
         
-        /* Botão de Incremento Principal */
+        /* Botão de Incremento Principal (+1) */
         .botoes-incremento-decremento > button:first-child {
-            flex-grow: 3; /* Faz o botão principal ser maior */
-            padding: 15px 30px;
+            flex-grow: 3; 
+            padding: 1rem 0.8rem; /* Mais espaço */
+            font-size: 1.1rem;
         }
 
         /* Botão de Decremento (-1) */
         .btn-decremento {
-            padding: 8px 10px !important;
-            font-size: 1.2em !important;
-            font-weight: bold;
-            flex-grow: 1;
-            background-color: #9ca3af !important; /* Cinza */
+            padding: 0.5rem 0.6rem !important;
+            font-size: 1rem !important;
+            background-color: #9ca3af !important; 
             color: white !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .btn-decremento:hover {
             background-color: #6b7280 !important;
@@ -94,7 +100,7 @@
         }
 
         #btnProcedente {
-            background-color: #10b981; /* Verde esmeralda */
+            background-color: var(--cor-sucesso);
             color: white;
         }
         #btnProcedente:hover {
@@ -102,7 +108,7 @@
             transform: translateY(-2px);
         }
         #btnImprocedente {
-            background-color: #ef4444; /* Vermelho vibrante */
+            background-color: var(--cor-erro);
             color: white;
         }
         #btnImprocedente:hover {
@@ -112,48 +118,42 @@
 
         .contador-label {
             font-weight: 600;
-            margin-top: 10px;
-            font-size: 1.2em;
-            color: #3b82f6; 
+            margin-top: 0.8rem;
+            font-size: 1.1rem;
+            color: var(--cor-secundaria);
         }
         
         /* Botões de Geração de Relatório */
         .botoes-geracao {
             display: flex;
             justify-content: space-between;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
         .botoes-geracao button {
             flex-grow: 1;
-            padding: 12px 20px;
-            font-size: 1em;
+            padding: 0.8rem 1rem;
+            font-size: 0.95rem;
             font-weight: 600;
             border: 2px solid transparent;
             border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+            transition: background-color 0.2s;
         }
         #btnGerarParcial {
-            background-color: #fcd34d; 
+            background-color: var(--cor-aviso); 
             color: #333;
         }
-        #btnGerarParcial:hover {
-            background-color: #fbbf24;
-        }
         #btnGerarFinal {
-            background-color: #3b82f6; 
+            background-color: var(--cor-secundaria); 
             color: white;
         }
-        #btnGerarFinal:hover {
-            background-color: #2563eb;
-        }
 
-        /* Área do Relatório e Cópia (Sem alterações significativas) */
+        /* Área do Relatório */
         #relatorio {
             width: 100%;
-            min-height: 200px;
-            padding: 15px;
+            min-height: 150px;
+            padding: 1rem;
             box-sizing: border-box;
             border: 1px solid #d1d5db;
             border-radius: 6px;
@@ -161,47 +161,30 @@
             font-family: 'Consolas', monospace;
             white-space: pre-wrap;
             background-color: #f9fafb;
-            font-size: 1em;
+            font-size: 0.9rem;
         }
         
+        /* Botão de Copiar e Reset */
         #copiarRelatorio {
             display: block;
             width: 100%;
-            padding: 12px;
-            margin-top: 15px;
+            padding: 0.8rem;
+            margin-top: 1rem;
             background-color: #14b8a6; 
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 1.1em;
+            font-size: 1rem;
             font-weight: 600;
-            transition: background-color 0.2s;
         }
         #copiarRelatorio:hover {
             background-color: #0d9488;
         }
-
-        /* Mensagem de Feedback e Reset */
-        .mensagem {
-            text-align: center;
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 4px;
-            font-weight: bold;
-        }
         #btnResetar {
-            display: block;
-            width: 100%;
-            padding: 8px;
-            margin-top: 15px;
+            padding: 0.6rem;
+            font-size: 0.8rem;
             background-color: #f97316; 
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.2s;
         }
         #btnResetar:hover:not(:disabled) {
             background-color: #ea580c;
@@ -209,6 +192,43 @@
         #btnResetar:disabled {
             background-color: #ccc;
             cursor: not-allowed;
+        }
+
+        /* Media Query para Celulares */
+        @media (max-width: 600px) {
+            body {
+                padding: 1rem;
+            }
+            .container {
+                padding: 1rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            /* Empilha os grupos de botões na vertical */
+            .botoes-contagem {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            .botao-grupo {
+                padding: 0 0.5rem;
+            }
+
+            /* Faz os botões de Parcial/Final ocuparem toda a largura */
+            .botoes-geracao {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .botoes-geracao button {
+                padding: 0.7rem 1rem;
+            }
+
+            /* Ajuste de fonte na área de relatório para telas menores */
+            #relatorio {
+                font-size: 0.85rem;
+                min-height: 120px;
+            }
         }
     </style>
 </head>
@@ -254,7 +274,7 @@
     // --- Configuração de Persistência e Variáveis ---
     const KEY_PROCEDENTE = 'countProcedente';
     const KEY_IMPROCEDENTE = 'countImprocedente';
-    const COOLDOWN_RESET_SECONDS = 5; // Tempo de espera para o reset
+    const COOLDOWN_RESET_SECONDS = 5; 
 
     let countProcedente = parseInt(localStorage.getItem(KEY_PROCEDENTE) || 0);
     let countImprocedente = parseInt(localStorage.getItem(KEY_IMPROCEDENTE) || 0);
@@ -290,7 +310,7 @@
 
     function alterarContador(tipo, valor) {
         if (tipo === 'procedente') {
-            countProcedente = Math.max(0, countProcedente + valor); // Garante que não fica negativo
+            countProcedente = Math.max(0, countProcedente + valor);
             displayProcedente.textContent = countProcedente;
         } else if (tipo === 'improcedente') {
             countImprocedente = Math.max(0, countImprocedente + valor);
@@ -308,7 +328,147 @@
         let cabecalho;
         
         if (tipo === 'PARCIAL') {
-            const dataHora = new Date().toLocaleString('pt-BR');
+            // Removido "GERADO EM: dataHora" conforme solicitado
+            cabecalho = `RELATÓRIO PARCIAL`; 
+        } else { // FINAL
+            cabecalho = `RELATÓRIO FINAL`;
+        }
+
+        const relatorioTexto = `
+${cabecalho}
+
+IMÓVEIS VISITADOS: ${total}
+
+PROCEDENTES: ${countProcedente}
+
+IMPROCEDENTES: ${countImprocedente}
+        `.trim(); 
+
+        return relatorioTexto;
+    }
+
+    function gerarRelatorio(tipo) {
+        if (countProcedente + countImprocedente === 0) {
+            alert("Nenhum imóvel visitado para gerar o relatório.");
+            return;
+        }
+        relatorioArea.value = gerarTextoRelatorio(tipo);
+
+        if (tipo === 'PARCIAL') {
+            mensagemCopia.textContent = "Relatório Parcial gerado.";
+            mensagemCopia.style.backgroundColor = "#fcd34d30";
+            mensagemCopia.style.color = "#a16207";
+        } else { // FINAL
+            mensagemCopia.textContent = "Relatório FINAL gerado. Contagens mantidas.";
+            mensagemCopia.style.backgroundColor = "#3b82f630";
+            mensagemCopia.style.color = "#1e40af";
+        }
+    }
+
+    // --- Função de Cópia ---
+
+    function copiarRelatorio() {
+        if (relatorioArea.value === "") {
+            mensagemCopia.textContent = "Gere um relatório Parcial ou Final primeiro!";
+            mensagemCopia.style.backgroundColor = "#fecaca";
+            mensagemCopia.style.color = "#b91c1c";
+            return;
+        }
+
+        relatorioArea.select(); 
+        relatorioArea.setSelectionRange(0, 99999); 
+        
+        navigator.clipboard.writeText(relatorioArea.value).then(() => {
+            mensagemCopia.textContent = '✅ Relatório copiado com sucesso para a área de transferência!';
+            mensagemCopia.style.backgroundColor = "#a7f3d0";
+            mensagemCopia.style.color = "#047857";
+            setTimeout(() => {
+                mensagemCopia.textContent = '';
+                mensagemCopia.style.backgroundColor = "transparent";
+            }, 3000);
+        }).catch(err => {
+            mensagemCopia.textContent = 'Erro ao copiar. Por favor, selecione e use Ctrl+C.';
+            mensagemCopia.style.backgroundColor = "#fecaca";
+            mensagemCopia.style.color = "#b91c1c";
+        });
+    }
+
+    // --- Função de Reset com Confirmação e Cooldown ---
+
+    function efetuarReset() {
+        countProcedente = 0;
+        countImprocedente = 0;
+        salvarContadores();
+        init(); 
+        limparFeedback();
+        
+        mensagemCopia.textContent = "Contadores resetados para 0 e salvos PERMANENTEMENTE.";
+        mensagemCopia.style.backgroundColor = "#fed7aa";
+        mensagemCopia.style.color = "#c2410c";
+        
+        isResetConfirmed = false;
+        btnResetar.textContent = 'RESETAR TODOS OS CONTADORES (Precisa de Confirmação)';
+        btnResetar.disabled = false;
+        clearTimeout(resetTimer);
+        resetTimer = null;
+    }
+
+    function resetarContadores() {
+        if (!isResetConfirmed) {
+            isResetConfirmed = true;
+            btnResetar.disabled = true;
+            let tempoRestante = COOLDOWN_RESET_SECONDS;
+            
+            mensagemCopia.textContent = `Aperte novamente em ${tempoRestante}s para confirmar o RESET.`;
+            mensagemCopia.style.backgroundColor = "#fef08a";
+            mensagemCopia.style.color = "#a16207";
+
+            btnResetar.textContent = `Aguarde para Confirmar (${tempoRestante}s)`;
+
+            const interval = setInterval(() => {
+                tempoRestante--;
+                if (tempoRestante > 0) {
+                    btnResetar.textContent = `Aguarde para Confirmar (${tempoRestante}s)`;
+                    mensagemCopia.textContent = `Aperte novamente em ${tempoRestante}s para confirmar o RESET.`;
+                } else {
+                    clearInterval(interval);
+                    btnResetar.disabled = false;
+                    btnResetar.textContent = 'CLIQUE PARA CONFIRMAR O RESET!';
+                    mensagemCopia.textContent = 'CONFIRME O RESET AGORA!';
+                }
+            }, 1000);
+
+            resetTimer = setTimeout(() => {
+                if (isResetConfirmed) {
+                    isResetConfirmed = false;
+                    btnResetar.textContent = 'RESETAR TODOS OS CONTADORES (Precisa de Confirmação)';
+                    mensagemCopia.textContent = '';
+                    mensagemCopia.style.backgroundColor = "transparent";
+                }
+            }, COOLDOWN_RESET_SECONDS * 1000);
+
+        } else if (btnResetar.disabled === false) {
+            efetuarReset();
+        }
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('btnProcedente').addEventListener('click', () => alterarContador('procedente', 1));
+    document.getElementById('btnImprocedente').addEventListener('click', () => alterarContador('improcedente', 1));
+    document.getElementById('btnRemoverProcedente').addEventListener('click', () => alterarContador('procedente', -1));
+    document.getElementById('btnRemoverImprocedente').addEventListener('click', () => alterarContador('improcedente', -1));
+    document.getElementById('btnGerarParcial').addEventListener('click', () => gerarRelatorio('PARCIAL'));
+    document.getElementById('btnGerarFinal').addEventListener('click', () => gerarRelatorio('FINAL'));
+    document.getElementById('copiarRelatorio').addEventListener('click', copiarRelatorio);
+    btnResetar.addEventListener('click', resetarContadores);
+
+    // Inicializa a página
+    init();
+</script>
+
+</body>
+</html>
+tring('pt-BR');
             cabecalho = `RELATÓRIO PARCIAL - GERADO EM: ${dataHora}`;
         } else { // FINAL
             cabecalho = `RELATÓRIO FINAL`; // Sem data, conforme solicitado
