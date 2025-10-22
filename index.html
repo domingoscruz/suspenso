@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Relatório de Visitas (Edição Direta)</title>
+    <title>Gerador de Relatório de Visitas (Final)</title>
     <style>
         /* Variáveis CSS */
         :root {
@@ -126,8 +126,8 @@
         .contador-display {
             font-weight: bold;
             color: var(--cor-principal);
-            cursor: pointer; /* Indica que é clicável */
-            padding: 0 5px; /* Espaço para clicar */
+            cursor: pointer; 
+            padding: 0 5px; 
             display: inline-block;
             transition: color 0.2s;
         }
@@ -223,7 +223,11 @@
             overflow: hidden; 
         }
         #btnResetar:hover:not(:disabled) { background-color: #ea580c; }
-        #btnResetar:disabled { background-color: #ff9d5e; cursor: wait; }
+        #btnResetar:disabled { 
+            background-color: #ccc; /* Cinza para desativado */
+            cursor: wait; 
+        }
+        /* Efeito de Carregamento (Barra de Progresso) */
         #btnResetar:disabled::before {
             content: '';
             position: absolute;
@@ -231,7 +235,7 @@
             left: 0;
             height: 100%;
             width: 100%;
-            background-color: rgba(255, 255, 255, 0.3);
+            background-color: rgba(255, 255, 255, 0.4);
             transform: translateX(-100%);
             animation: loading-bar 5s linear forwards; 
         }
@@ -359,7 +363,7 @@
         mensagemCopia.style.backgroundColor = 'transparent';
     }
 
-    // --- Funções de Edição Direta (Novo) ---
+    // --- Funções de Edição Direta ---
 
     function saveCount(element, key) {
         const input = element.querySelector('input');
@@ -369,10 +373,10 @@
 
         // Validação
         if (isNaN(newValue) || newValue < 0) {
-            newValue = 0; // Se inválido, define como 0
+            newValue = 0; 
         }
 
-        // Atualiza a variável global e o localStorage
+        // Atualiza a variável global
         if (key === KEY_PROCEDENTE) {
             countProcedente = newValue;
         } else if (key === KEY_IMPROCEDENTE) {
@@ -380,10 +384,17 @@
         }
         salvarContadores();
         
-        // Retorna ao estado de exibição
-        element.innerHTML = newValue;
+        // Recria o elemento span com a contagem atualizada e o event listener
+        const newSpan = document.createElement('span');
+        newSpan.id = key === KEY_PROCEDENTE ? 'contadorProcedente' : 'contadorImprocedente';
+        newSpan.className = 'contador-display';
+        newSpan.textContent = newValue;
+        newSpan.addEventListener('click', enableEditing); // Re-adiciona o listener
 
-        // Limpa feedback
+        // Substitui o input pelo novo span
+        element.parentNode.replaceChild(newSpan, input);
+
+        // Limpa feedback e relatório
         mensagemCopia.textContent = '';
         mensagemCopia.style.backgroundColor = 'transparent';
         relatorioArea.value = "";
@@ -394,7 +405,6 @@
         const currentCount = span.textContent;
         const key = span.id === 'contadorProcedente' ? KEY_PROCEDENTE : KEY_IMPROCEDENTE;
         
-        // Cria o campo de input
         const input = document.createElement('input');
         input.type = 'number';
         input.value = currentCount;
@@ -406,15 +416,18 @@
         input.focus();
         input.select();
 
+        // Passamos o parentNode para a função saveCount para que ela possa reinserir o span
+        const parentNode = input.parentNode; 
+
         // Evento para salvar ao sair do foco
         input.addEventListener('blur', () => {
-            saveCount(input.parentNode, key);
+            saveCount(parentNode, key);
         });
 
         // Evento para salvar ao pressionar Enter
         input.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                saveCount(input.parentNode, key);
+                saveCount(parentNode, key);
             }
         });
     }
@@ -464,7 +477,6 @@ IMPROCEDENTES: ${countImprocedente}
             mensagemCopia.style.color = "#b91c1c";
             return;
         }
-        // Lógica de cópia... (mantida)
         relatorioArea.select(); 
         relatorioArea.setSelectionRange(0, 99999); 
         
@@ -483,7 +495,7 @@ IMPROCEDENTES: ${countImprocedente}
         });
     }
 
-    // --- Função de Reset com Carregamento Visual ---
+    // --- Função de Reset com Carregamento Visual (Sem mensagens no botão) ---
 
     function efetuarReset() {
         countProcedente = 0;
@@ -492,9 +504,11 @@ IMPROCEDENTES: ${countImprocedente}
         init(); 
         relatorioArea.value = ""; 
         
-        // Restaura o botão
+        // Restaura o botão ao estado normal
         btnResetar.disabled = false;
         btnResetar.textContent = initialResetText;
+        
+        // Remove a animação visual do CSS
         btnResetar.style.animation = 'none';
         void btnResetar.offsetWidth; 
         btnResetar.style.animation = null;
@@ -514,24 +528,11 @@ IMPROCEDENTES: ${countImprocedente}
 
         btnResetar.disabled = true;
         
+        // Aplica a animação visual via style para garantir o reset
         btnResetar.style.animation = 'loading-bar 5s linear forwards';
 
-        let tempoRestante = COOLDOWN_RESET_MS / 1000;
-        
-        const interval = setInterval(() => {
-            tempoRestante--;
-            if (tempoRestante >= 0) {
-                btnResetar.textContent = `Aguardando Reset Total (${tempoRestante}s)`;
-            } else {
-                clearInterval(interval);
-            }
-        }, 1000);
-        
+        // Efetua o reset após o tempo de espera (5 segundos)
         setTimeout(efetuarReset, COOLDOWN_RESET_MS);
-
-        mensagemCopia.textContent = 'Aguarde 5 segundos. O reset será efetuado automaticamente.';
-        mensagemCopia.style.backgroundColor = "#fef08a";
-        mensagemCopia.style.color = "#a16207";
     }
 
     // --- Event Listeners ---
@@ -540,7 +541,7 @@ IMPROCEDENTES: ${countImprocedente}
     document.getElementById('btnRemoverProcedente').addEventListener('click', () => alterarContador('procedente', -1));
     document.getElementById('btnRemoverImprocedente').addEventListener('click', () => alterarContador('improcedente', -1));
     
-    // Novo: Evento de clique para edição direta
+    // Evento de clique para edição direta (Adicionados ao inicializar)
     displayProcedente.addEventListener('click', enableEditing);
     displayImprocedente.addEventListener('click', enableEditing);
     
