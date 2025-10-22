@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Relatório Simples</title>
+    <title>Gerador de Relatório de Visitas</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,30 +11,34 @@
             background-color: #f4f4f4;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin: 0 auto;
             background-color: #fff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
         h1, h2 {
             text-align: center;
             color: #333;
         }
-        .botoes {
+        .botoes-contagem {
             display: flex;
             justify-content: space-around;
             margin-bottom: 20px;
+            gap: 10px;
         }
-        .botoes button {
-            padding: 10px 20px;
-            font-size: 16px;
+        .botoes-contagem button {
+            padding: 12px 25px;
+            font-size: 18px;
             cursor: pointer;
             border: none;
             border-radius: 5px;
-            transition: background-color 0.3s;
-            width: 45%; /* Ajuste para ter espaço entre eles */
+            transition: background-color 0.3s, transform 0.1s;
+            width: 48%;
+        }
+        .botoes-contagem button:active {
+            transform: translateY(1px);
         }
         #btnProcedente {
             background-color: #4CAF50; /* Verde */
@@ -50,24 +54,66 @@
         #btnImprocedente:hover {
             background-color: #da190b;
         }
+        .contador-label {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 5px;
+            font-size: 1.1em;
+            color: #555;
+        }
+        .secao-relatorio {
+            margin-top: 30px;
+            border-top: 2px solid #ccc;
+            padding-top: 20px;
+        }
+        .botoes-geracao {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .botoes-geracao button {
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 48%;
+        }
+        #btnGerarParcial {
+            background-color: #FFC107; /* Amarelo */
+            color: #333;
+        }
+        #btnGerarParcial:hover {
+            background-color: #e0a800;
+        }
+        #btnGerarFinal {
+            background-color: #007bff; /* Azul */
+            color: white;
+        }
+        #btnGerarFinal:hover {
+            background-color: #0056b3;
+        }
         #relatorio {
             width: 100%;
-            height: 150px;
-            padding: 10px;
+            min-height: 180px;
+            padding: 15px;
             box-sizing: border-box;
-            border: 1px solid #ccc;
+            border: 1px solid #aaa;
             border-radius: 4px;
-            resize: vertical; /* Permite redimensionar verticalmente */
-            font-family: monospace;
-            white-space: pre-wrap; /* Mantém a formatação de nova linha e espaço */
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
             background-color: #e9e9e9;
+            font-size: 14px;
         }
         #copiarRelatorio {
             display: block;
             width: 100%;
             padding: 10px;
             margin-top: 10px;
-            background-color: #008CBA; /* Azul */
+            background-color: #28a745; /* Verde escuro */
             color: white;
             border: none;
             border-radius: 5px;
@@ -76,42 +122,45 @@
             transition: background-color 0.3s;
         }
         #copiarRelatorio:hover {
-            background-color: #005f7a;
-        }
-        .contador-label {
-            text-align: center;
-            font-weight: bold;
-            margin-top: 5px;
+            background-color: #1e7e34;
         }
         .mensagem {
             text-align: center;
             margin-top: 10px;
-            color: green;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Contador e Gerador de Relatório</h1>
+    <h1>Contagem de Visitas de Imóveis</h1>
 
-    <div class="botoes">
+    <div class="botoes-contagem">
         <div>
             <button id="btnProcedente">Procedente</button>
-            <div class="contador-label">Contador: <span id="contadorProcedente">0</span></div>
+            <div class="contador-label">Contagem: <span id="contadorProcedente">0</span></div>
         </div>
         <div>
             <button id="btnImprocedente">Improcedente</button>
-            <div class="contador-label">Contador: <span id="contadorImprocedente">0</span></div>
+            <div class="contador-label">Contagem: <span id="contadorImprocedente">0</span></div>
         </div>
     </div>
 
-    <h2>Relatório</h2>
-    <textarea id="relatorio" readonly></textarea>
+    <div class="secao-relatorio">
+        <h2>Gerar Relatório</h2>
+        
+        <div class="botoes-geracao">
+            <button id="btnGerarParcial">Gerar Relatório Parcial</button>
+            <button id="btnGerarFinal">Gerar Relatório Final</button>
+        </div>
 
-    <button id="copiarRelatorio">Copiar Relatório</button>
+        <textarea id="relatorio" readonly placeholder="O relatório será gerado aqui..."></textarea>
 
-    <p class="mensagem" id="mensagemCopia"></p>
+        <button id="copiarRelatorio">Copiar Relatório Gerado</button>
+
+        <p class="mensagem" id="mensagemCopia"></p>
+    </div>
 </div>
 
 <script>
@@ -120,79 +169,115 @@
     let countImprocedente = 0;
 
     // Elementos do DOM
-    const btnProcedente = document.getElementById('btnProcedente');
-    const btnImprocedente = document.getElementById('btnImprocedente');
     const displayProcedente = document.getElementById('contadorProcedente');
     const displayImprocedente = document.getElementById('contadorImprocedente');
     const relatorioArea = document.getElementById('relatorio');
-    const btnCopiar = document.getElementById('copiarRelatorio');
     const mensagemCopia = document.getElementById('mensagemCopia');
 
-    // Função para atualizar o relatório
-    function atualizarRelatorio() {
-        const dataAtual = new Date().toLocaleDateString('pt-BR');
-        const horaAtual = new Date().toLocaleTimeString('pt-BR');
+    // Função principal para gerar o texto do relatório
+    function gerarTextoRelatorio(tipo) {
+        const total = countProcedente + countImprocedente;
 
+        // Formato solicitado pelo usuário
         const relatorioTexto = `
-Relatório Gerado em: ${dataAtual} às ${horaAtual}
+RELATÓRIO ${tipo.toUpperCase()}
 
-Contagem de Procedentes: ${countProcedente}
-Contagem de Improcedentes: ${countImprocedente}
+IMÓVEIS VISITADOS: ${total}
 
-Total de Itens Contados: ${countProcedente + countImprocedente}
-        `.trim(); // O .trim() remove espaços/linhas em branco extras no início/fim
+PROCEDENTES: ${countProcedente}
 
-        relatorioArea.value = relatorioTexto;
+IMPROCEDENTES: ${countImprocedente}
+        `.trim(); 
+
+        return relatorioTexto;
     }
 
-    // Função para incrementar o contador Procedente
-    function incrementarProcedente() {
-        countProcedente++;
-        displayProcedente.textContent = countProcedente;
-        atualizarRelatorio();
+    // Função que lida com o clique nos botões de contagem
+    function incrementarContador(tipo) {
+        if (tipo === 'procedente') {
+            countProcedente++;
+            displayProcedente.textContent = countProcedente;
+        } else if (tipo === 'improcedente') {
+            countImprocedente++;
+            displayImprocedente.textContent = countImprocedente;
+        }
+        // Limpa a área de relatório para indicar que os dados foram atualizados
+        relatorioArea.value = ""; 
+        mensagemCopia.textContent = "";
     }
 
-    // Função para incrementar o contador Improcedente
-    function incrementarImprocedente() {
-        countImprocedente++;
-        displayImprocedente.textContent = countImprocedente;
-        atualizarRelatorio();
+    // Função para gerar o Relatório Parcial
+    function gerarRelatorioParcial() {
+        if (countProcedente + countImprocedente === 0) {
+            alert("Nenhum imóvel visitado para gerar o relatório.");
+            return;
+        }
+        relatorioArea.value = gerarTextoRelatorio("PARCIAL");
+        mensagemCopia.textContent = "Relatório Parcial gerado.";
+        mensagemCopia.style.color = "#FFC107";
+    }
+
+    // Função para gerar o Relatório Final e resetar os contadores
+    function gerarRelatorioFinal() {
+        if (countProcedente + countImprocedente === 0) {
+            alert("Nenhum imóvel visitado para gerar o relatório final.");
+            return;
+        }
+
+        // 1. Gera o relatório
+        relatorioArea.value = gerarTextoRelatorio("FINAL");
+        
+        // 2. Limpa os contadores
+        countProcedente = 0;
+        countImprocedente = 0;
+        displayProcedente.textContent = 0;
+        displayImprocedente.textContent = 0;
+
+        // 3. Feedback
+        mensagemCopia.textContent = "Relatório FINAL gerado. Contadores resetados para 0.";
+        mensagemCopia.style.color = "#007bff";
     }
 
     // Função para copiar o texto do relatório
     function copiarRelatorio() {
-        relatorioArea.select(); // Seleciona o texto na textarea
-        relatorioArea.setSelectionRange(0, 99999); // Para mobile
+        if (relatorioArea.value === "") {
+            mensagemCopia.textContent = "Gere um relatório Parcial ou Final primeiro!";
+            mensagemCopia.style.color = "#f44336";
+            return;
+        }
+
+        relatorioArea.select(); 
+        relatorioArea.setSelectionRange(0, 99999); 
         
-        // Tenta usar a API Clipboard (mais moderna)
         navigator.clipboard.writeText(relatorioArea.value).then(() => {
-            mensagemCopia.textContent = 'Relatório copiado para a área de transferência!';
+            mensagemCopia.textContent = '✅ Relatório copiado com sucesso!';
+            mensagemCopia.style.color = "#28a745";
             setTimeout(() => {
-                mensagemCopia.textContent = '';
+                // Se o último relatório gerado foi o final, não queremos apagar o feedback do reset.
+                if (!mensagemCopia.textContent.includes("resetados")) {
+                    mensagemCopia.textContent = '';
+                }
             }, 3000);
         }).catch(err => {
-            // Fallback para document.execCommand() (mais antiga, pode estar obsoleta)
+            // Fallback (menos confiável em navegadores modernos, mas útil)
             try {
                 document.execCommand('copy');
-                mensagemCopia.textContent = 'Relatório copiado para a área de transferência! (Método antigo)';
-                setTimeout(() => {
-                    mensagemCopia.textContent = '';
-                }, 3000);
+                mensagemCopia.textContent = '✅ Relatório copiado! (Método antigo)';
             } catch (err) {
-                mensagemCopia.textContent = 'Erro ao copiar. Por favor, selecione o texto e use Ctrl+C.';
+                mensagemCopia.textContent = 'Erro ao copiar. Por favor, selecione e use Ctrl+C.';
             }
+            mensagemCopia.style.color = "#f44336";
         });
     }
 
-    // Adiciona os event listeners aos botões
-    btnProcedente.addEventListener('click', incrementarProcedente);
-    btnImprocedente.addEventListener('click', incrementarImprocedente);
-    btnCopiar.addEventListener('click', copiarRelatorio);
+    // Adiciona os event listeners
+    document.getElementById('btnProcedente').addEventListener('click', () => incrementarContador('procedente'));
+    document.getElementById('btnImprocedente').addEventListener('click', () => incrementarContador('improcedente'));
+    document.getElementById('btnGerarParcial').addEventListener('click', gerarRelatorioParcial);
+    document.getElementById('btnGerarFinal').addEventListener('click', gerarRelatorioFinal);
+    document.getElementById('copiarRelatorio').addEventListener('click', copiarRelatorio);
 
-    // Inicializa o relatório ao carregar a página
-    atualizarRelatorio();
 </script>
 
 </body>
-  </html>
-
+</html>
