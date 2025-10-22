@@ -18,7 +18,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 1.5rem; /* Ajuste para celular */
+            padding: 1.5rem; 
             background-color: #eef2f7;
             color: #333;
         }
@@ -34,7 +34,7 @@
             text-align: center;
             color: var(--cor-principal);
             margin-bottom: 1.5rem;
-            font-size: 1.8rem; /* Ajuste para celular */
+            font-size: 1.8rem; 
         }
         h2 {
             text-align: center;
@@ -43,7 +43,7 @@
             margin-bottom: 1rem;
             border-bottom: 2px solid #e5e7eb;
             padding-bottom: 0.5rem;
-            font-size: 1.3rem; /* Ajuste para celular */
+            font-size: 1.3rem; 
         }
         
         /* Botões de Contagem */
@@ -62,7 +62,7 @@
         
         .botoes-incremento-decremento {
             display: flex;
-            align-items: stretch; /* Garante que os botões tenham a mesma altura */
+            align-items: stretch; 
             gap: 0.5rem;
             width: 100%; 
             max-width: 250px; 
@@ -83,7 +83,7 @@
         /* Botão de Incremento Principal (+1) */
         .botoes-incremento-decremento > button:first-child {
             flex-grow: 3; 
-            padding: 1rem 0.8rem; /* Mais espaço */
+            padding: 1rem 0.8rem; 
             font-size: 1.1rem;
         }
 
@@ -182,16 +182,35 @@
             background-color: #0d9488;
         }
         #btnResetar {
+            display: block;
+            width: 100%;
             padding: 0.6rem;
-            font-size: 0.8rem;
+            margin-top: 1rem;
             background-color: #f97316; 
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
         }
         #btnResetar:hover:not(:disabled) {
             background-color: #ea580c;
         }
         #btnResetar:disabled {
+            /* Mantido apenas se a lógica do botão for desativar, mas a nova lógica não desativa */
             background-color: #ccc;
             cursor: not-allowed;
+        }
+
+        /* Mensagem de Feedback */
+        .mensagem {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
         }
 
         /* Media Query para Celulares */
@@ -267,14 +286,14 @@
     
     <p class="mensagem" id="mensagemCopia"></p>
 
-    <button id="btnResetar">RESETAR TODOS OS CONTADORES (Precisa de Confirmação)</button>
+    <button id="btnResetar">RESETAR TODOS OS CONTADORES (Clique 2x para confirmar)</button>
 </div>
 
 <script>
     // --- Configuração de Persistência e Variáveis ---
     const KEY_PROCEDENTE = 'countProcedente';
     const KEY_IMPROCEDENTE = 'countImprocedente';
-    const COOLDOWN_RESET_SECONDS = 5; 
+    const COOLDOWN_RESET_SECONDS = 5; // Tempo limite para o segundo clique
 
     let countProcedente = parseInt(localStorage.getItem(KEY_PROCEDENTE) || 0);
     let countImprocedente = parseInt(localStorage.getItem(KEY_IMPROCEDENTE) || 0);
@@ -302,8 +321,7 @@
 
     function limparFeedback() {
         relatorioArea.value = ""; 
-        mensagemCopia.textContent = "";
-        mensagemCopia.style.backgroundColor = "transparent";
+        // Não limpa mensagemCopia aqui, pois ela é essencial para o feedback do reset
     }
 
     // --- Funções de Contagem ---
@@ -318,7 +336,152 @@
         }
         
         salvarContadores();
-        limparFeedback();
+        
+        // Limpa a área do relatório, mas mantém o feedback do reset
+        if (relatorioArea.value !== "") {
+             relatorioArea.value = ""; 
+        }
+    }
+
+    // --- Funções de Relatório ---
+
+    function gerarTextoRelatorio(tipo) {
+        const total = countProcedente + countImprocedente;
+        let cabecalho;
+        
+        if (tipo === 'PARCIAL') {
+            // Removido o carimbo de data/hora do relatório parcial
+            cabecalho = `RELATÓRIO PARCIAL`; 
+        } else { // FINAL
+            cabecalho = `RELATÓRIO FINAL`;
+        }
+
+        const relatorioTexto = `
+${cabecalho}
+
+IMÓVEIS VISITADOS: ${total}
+
+PROCEDENTES: ${countProcedente}
+
+IMPROCEDENTES: ${countImprocedente}
+        `.trim(); 
+
+        return relatorioTexto;
+    }
+
+    function gerarRelatorio(tipo) {
+        if (countProcedente + countImprocedente === 0) {
+            alert("Nenhum imóvel visitado para gerar o relatório.");
+            return;
+        }
+        relatorioArea.value = gerarTextoRelatorio(tipo);
+
+        if (tipo === 'PARCIAL') {
+            mensagemCopia.textContent = "Relatório Parcial gerado.";
+            mensagemCopia.style.backgroundColor = "#fcd34d30";
+            mensagemCopia.style.color = "#a16207";
+        } else { // FINAL
+            mensagemCopia.textContent = "Relatório FINAL gerado. Contagens mantidas.";
+            mensagemCopia.style.backgroundColor = "#3b82f630";
+            mensagemCopia.style.color = "#1e40af";
+        }
+    }
+
+    // --- Função de Cópia ---
+
+    function copiarRelatorio() {
+        if (relatorioArea.value === "") {
+            mensagemCopia.textContent = "Gere um relatório Parcial ou Final primeiro!";
+            mensagemCopia.style.backgroundColor = "#fecaca";
+            mensagemCopia.style.color = "#b91c1c";
+            return;
+        }
+
+        relatorioArea.select(); 
+        relatorioArea.setSelectionRange(0, 99999); 
+        
+        navigator.clipboard.writeText(relatorioArea.value).then(() => {
+            mensagemCopia.textContent = '✅ Relatório copiado com sucesso para a área de transferência!';
+            mensagemCopia.style.backgroundColor = "#a7f3d0";
+            mensagemCopia.style.color = "#047857";
+            setTimeout(() => {
+                mensagemCopia.textContent = '';
+                mensagemCopia.style.backgroundColor = "transparent";
+            }, 3000);
+        }).catch(err => {
+            mensagemCopia.textContent = 'Erro ao copiar. Por favor, selecione e use Ctrl+C.';
+            mensagemCopia.style.backgroundColor = "#fecaca";
+            mensagemCopia.style.color = "#b91c1c";
+        });
+    }
+
+    // --- Função de Reset (Duplo Clique) ---
+
+    function efetuarReset() {
+        countProcedente = 0;
+        countImprocedente = 0;
+        salvarContadores();
+        init(); 
+        
+        // Limpar a área de texto do relatório após o reset
+        relatorioArea.value = ""; 
+
+        mensagemCopia.textContent = "Contadores resetados para 0 e salvos PERMANENTEMENTE.";
+        mensagemCopia.style.backgroundColor = "#fed7aa";
+        mensagemCopia.style.color = "#c2410c";
+        
+        // Finaliza o estado de confirmação e cooldown
+        isResetConfirmed = false;
+        clearTimeout(resetTimer);
+        resetTimer = null;
+    }
+
+    function resetarContadores() {
+        // Limpa feedback anterior (exceto do reset)
+        if (relatorioArea.value !== "") {
+            mensagemCopia.textContent = '';
+            mensagemCopia.style.backgroundColor = 'transparent';
+        }
+
+        if (isResetConfirmed) {
+            // Segundo clique: Confirmação recebida
+            efetuarReset();
+        } else {
+            // Primeiro clique: Inicia a janela de confirmação
+            isResetConfirmed = true;
+            
+            mensagemCopia.textContent = `⚠️ Clique novamente no botão em até ${COOLDOWN_RESET_SECONDS}s para confirmar a limpeza total.`;
+            mensagemCopia.style.backgroundColor = "#fef08a";
+            mensagemCopia.style.color = "#a16207";
+
+            // Cooldown: se não houver o segundo clique no tempo, cancela a confirmação
+            resetTimer = setTimeout(() => {
+                isResetConfirmed = false;
+                mensagemCopia.textContent = 'Confirmação expirada. Para resetar, clique no botão duas vezes.';
+                mensagemCopia.style.backgroundColor = "#fed7aa";
+                mensagemCopia.style.color = "#c2410c";
+                resetTimer = null;
+            }, COOLDOWN_RESET_SECONDS * 1000);
+        }
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('btnProcedente').addEventListener('click', () => alterarContador('procedente', 1));
+    document.getElementById('btnImprocedente').addEventListener('click', () => alterarContador('improcedente', 1));
+    document.getElementById('btnRemoverProcedente').addEventListener('click', () => alterarContador('procedente', -1));
+    document.getElementById('btnRemoverImprocedente').addEventListener('click', () => alterarContador('improcedente', -1));
+    document.getElementById('btnGerarParcial').addEventListener('click', () => gerarRelatorio('PARCIAL'));
+    document.getElementById('btnGerarFinal').addEventListener('click', () => gerarRelatorio('FINAL'));
+    document.getElementById('copiarRelatorio').addEventListener('click', copiarRelatorio);
+    btnResetar.addEventListener('click', resetarContadores);
+
+    // Inicializa a página
+    init();
+</script>
+
+</body>
+</html>
+imparFeedback();
     }
 
     // --- Funções de Relatório ---
