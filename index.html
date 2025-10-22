@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Relatório de Visitas (Persistente)</title>
+    <title>Gerador de Relatório de Visitas (Avançado)</title>
     <style>
         /* Estilos Globais */
         body {
@@ -36,7 +36,7 @@
             padding-bottom: 5px;
         }
         
-        /* Botões de Contagem (Estilo Aprimorado) */
+        /* Botões de Contagem (Estilo Aprimorado e Alinhamento) */
         .botoes-contagem {
             display: flex;
             justify-content: space-around;
@@ -46,19 +46,53 @@
         .botao-grupo {
             flex-grow: 1;
             text-align: center;
+            display: flex; /* Adicionado para alinhar verticalmente */
+            flex-direction: column; /* Coloca os itens em coluna */
+            align-items: center; /* Centraliza horizontalmente */
         }
+        
+        .botoes-incremento-decremento {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Espaço entre os botões */
+            width: 100%; /* Ocupa a largura total do grupo */
+            max-width: 250px; /* Limite para botões */
+            margin-bottom: 10px;
+        }
+
         .botao-grupo button {
-            padding: 15px 30px;
+            padding: 15px 10px; /* Ajustado para melhor proporção */
             font-size: 1.2em;
             font-weight: bold;
             cursor: pointer;
             border: none;
             border-radius: 8px;
             transition: all 0.2s ease-in-out;
-            width: 100%;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex-grow: 1;
         }
         
+        /* Botão de Incremento Principal */
+        .botoes-incremento-decremento > button:first-child {
+            flex-grow: 3; /* Faz o botão principal ser maior */
+            padding: 15px 30px;
+        }
+
+        /* Botão de Decremento (-1) */
+        .btn-decremento {
+            padding: 8px 10px !important;
+            font-size: 1.2em !important;
+            font-weight: bold;
+            flex-grow: 1;
+            background-color: #9ca3af !important; /* Cinza */
+            color: white !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .btn-decremento:hover {
+            background-color: #6b7280 !important;
+            transform: translateY(-1px);
+        }
+
         #btnProcedente {
             background-color: #10b981; /* Verde esmeralda */
             color: white;
@@ -80,7 +114,7 @@
             font-weight: 600;
             margin-top: 10px;
             font-size: 1.2em;
-            color: #3b82f6; /* Azul moderno */
+            color: #3b82f6; 
         }
         
         /* Botões de Geração de Relatório */
@@ -101,21 +135,21 @@
             transition: background-color 0.2s, border-color 0.2s, color 0.2s;
         }
         #btnGerarParcial {
-            background-color: #fcd34d; /* Amarelo ouro */
+            background-color: #fcd34d; 
             color: #333;
         }
         #btnGerarParcial:hover {
             background-color: #fbbf24;
         }
         #btnGerarFinal {
-            background-color: #3b82f6; /* Azul principal */
+            background-color: #3b82f6; 
             color: white;
         }
         #btnGerarFinal:hover {
             background-color: #2563eb;
         }
 
-        /* Área do Relatório */
+        /* Área do Relatório e Cópia (Sem alterações significativas) */
         #relatorio {
             width: 100%;
             min-height: 200px;
@@ -130,13 +164,12 @@
             font-size: 1em;
         }
         
-        /* Botão de Copiar */
         #copiarRelatorio {
             display: block;
             width: 100%;
             padding: 12px;
             margin-top: 15px;
-            background-color: #14b8a6; /* Ciano moderno */
+            background-color: #14b8a6; 
             color: white;
             border: none;
             border-radius: 6px;
@@ -149,7 +182,7 @@
             background-color: #0d9488;
         }
 
-        /* Mensagem de Feedback */
+        /* Mensagem de Feedback e Reset */
         .mensagem {
             text-align: center;
             margin-top: 15px;
@@ -162,7 +195,7 @@
             width: 100%;
             padding: 8px;
             margin-top: 15px;
-            background-color: #f97316; /* Laranja */
+            background-color: #f97316; 
             color: white;
             border: none;
             border-radius: 6px;
@@ -170,8 +203,12 @@
             font-size: 0.9em;
             transition: background-color 0.2s;
         }
-        #btnResetar:hover {
+        #btnResetar:hover:not(:disabled) {
             background-color: #ea580c;
+        }
+        #btnResetar:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -182,11 +219,17 @@
 
     <div class="botoes-contagem">
         <div class="botao-grupo">
-            <button id="btnProcedente">Procedente</button>
+            <div class="botoes-incremento-decremento">
+                <button id="btnProcedente">+1 Procedente</button>
+                <button class="btn-decremento" id="btnRemoverProcedente">-1</button>
+            </div>
             <div class="contador-label">Contagem: <span id="contadorProcedente">0</span></div>
         </div>
         <div class="botao-grupo">
-            <button id="btnImprocedente">Improcedente</button>
+            <div class="botoes-incremento-decremento">
+                <button id="btnImprocedente">+1 Improcedente</button>
+                <button class="btn-decremento" id="btnRemoverImprocedente">-1</button>
+            </div>
             <div class="contador-label">Contagem: <span id="contadorImprocedente">0</span></div>
         </div>
     </div>
@@ -204,59 +247,75 @@
     
     <p class="mensagem" id="mensagemCopia"></p>
 
-    <button id="btnResetar">RESETAR TODOS OS CONTADORES (Permanente)</button>
+    <button id="btnResetar">RESETAR TODOS OS CONTADORES (Precisa de Confirmação)</button>
 </div>
 
 <script>
-    // --- Persistência de Dados (localStorage) ---
+    // --- Configuração de Persistência e Variáveis ---
     const KEY_PROCEDENTE = 'countProcedente';
     const KEY_IMPROCEDENTE = 'countImprocedente';
+    const COOLDOWN_RESET_SECONDS = 5; // Tempo de espera para o reset
 
     let countProcedente = parseInt(localStorage.getItem(KEY_PROCEDENTE) || 0);
     let countImprocedente = parseInt(localStorage.getItem(KEY_IMPROCEDENTE) || 0);
+    let isResetConfirmed = false;
+    let resetTimer = null;
 
     // Elementos do DOM
     const displayProcedente = document.getElementById('contadorProcedente');
     const displayImprocedente = document.getElementById('contadorImprocedente');
     const relatorioArea = document.getElementById('relatorio');
     const mensagemCopia = document.getElementById('mensagemCopia');
+    const btnResetar = document.getElementById('btnResetar');
 
-    // Inicializa a exibição com os valores salvos
+    // --- Funções de Estado e Persistência ---
+
     function init() {
         displayProcedente.textContent = countProcedente;
         displayImprocedente.textContent = countImprocedente;
     }
 
-    // Salva os contadores no localStorage
     function salvarContadores() {
         localStorage.setItem(KEY_PROCEDENTE, countProcedente);
         localStorage.setItem(KEY_IMPROCEDENTE, countImprocedente);
     }
 
-    // Função que lida com o clique nos botões de contagem
-    function incrementarContador(tipo) {
-        if (tipo === 'procedente') {
-            countProcedente++;
-        } else if (tipo === 'improcedente') {
-            countImprocedente++;
-        }
-        
-        displayProcedente.textContent = countProcedente;
-        displayImprocedente.textContent = countImprocedente;
-        
-        salvarContadores(); // Salva a alteração
+    function limparFeedback() {
         relatorioArea.value = ""; 
         mensagemCopia.textContent = "";
+        mensagemCopia.style.backgroundColor = "transparent";
     }
-    
-    // Função principal para gerar o texto do relatório
+
+    // --- Funções de Contagem ---
+
+    function alterarContador(tipo, valor) {
+        if (tipo === 'procedente') {
+            countProcedente = Math.max(0, countProcedente + valor); // Garante que não fica negativo
+            displayProcedente.textContent = countProcedente;
+        } else if (tipo === 'improcedente') {
+            countImprocedente = Math.max(0, countImprocedente + valor);
+            displayImprocedente.textContent = countImprocedente;
+        }
+        
+        salvarContadores();
+        limparFeedback();
+    }
+
+    // --- Funções de Relatório ---
+
     function gerarTextoRelatorio(tipo) {
         const total = countProcedente + countImprocedente;
-        const dataHora = new Date().toLocaleString('pt-BR');
+        let cabecalho;
+        
+        if (tipo === 'PARCIAL') {
+            const dataHora = new Date().toLocaleString('pt-BR');
+            cabecalho = `RELATÓRIO PARCIAL - GERADO EM: ${dataHora}`;
+        } else { // FINAL
+            cabecalho = `RELATÓRIO FINAL`; // Sem data, conforme solicitado
+        }
 
-        // Formato solicitado
         const relatorioTexto = `
-RELATÓRIO ${tipo.toUpperCase()} - GERADO EM: ${dataHora}
+${cabecalho}
 
 IMÓVEIS VISITADOS: ${total}
 
@@ -268,33 +327,26 @@ IMPROCEDENTES: ${countImprocedente}
         return relatorioTexto;
     }
 
-    // Função para gerar o Relatório Parcial
-    function gerarRelatorioParcial() {
+    function gerarRelatorio(tipo) {
         if (countProcedente + countImprocedente === 0) {
             alert("Nenhum imóvel visitado para gerar o relatório.");
             return;
         }
-        relatorioArea.value = gerarTextoRelatorio("PARCIAL");
-        mensagemCopia.textContent = "Relatório Parcial gerado.";
-        mensagemCopia.style.backgroundColor = "#fcd34d30";
-        mensagemCopia.style.color = "#a16207";
-    }
+        relatorioArea.value = gerarTextoRelatorio(tipo);
 
-    // Função para gerar o Relatório Final (sem resetar)
-    function gerarRelatorioFinal() {
-        if (countProcedente + countImprocedente === 0) {
-            alert("Nenhum imóvel visitado para gerar o relatório final.");
-            return;
+        if (tipo === 'PARCIAL') {
+            mensagemCopia.textContent = "Relatório Parcial gerado.";
+            mensagemCopia.style.backgroundColor = "#fcd34d30";
+            mensagemCopia.style.color = "#a16207";
+        } else { // FINAL
+            mensagemCopia.textContent = "Relatório FINAL gerado. Contagens mantidas.";
+            mensagemCopia.style.backgroundColor = "#3b82f630";
+            mensagemCopia.style.color = "#1e40af";
         }
-
-        relatorioArea.value = gerarTextoRelatorio("FINAL");
-        
-        mensagemCopia.textContent = "Relatório FINAL gerado. Contagens mantidas.";
-        mensagemCopia.style.backgroundColor = "#3b82f630";
-        mensagemCopia.style.color = "#1e40af";
     }
 
-    // Função para copiar o texto do relatório
+    // --- Função de Cópia (Sem alterações significativas) ---
+
     function copiarRelatorio() {
         if (relatorioArea.value === "") {
             mensagemCopia.textContent = "Gere um relatório Parcial ou Final primeiro!";
@@ -312,6 +364,96 @@ IMPROCEDENTES: ${countImprocedente}
             mensagemCopia.style.color = "#047857";
             setTimeout(() => {
                 mensagemCopia.textContent = '';
+                mensagemCopia.style.backgroundColor = "transparent";
+            }, 3000);
+        }).catch(err => {
+            mensagemCopia.textContent = 'Erro ao copiar. Por favor, selecione e use Ctrl+C.';
+            mensagemCopia.style.backgroundColor = "#fecaca";
+            mensagemCopia.style.color = "#b91c1c";
+        });
+    }
+
+    // --- Função de Reset com Confirmação e Cooldown ---
+
+    function efetuarReset() {
+        countProcedente = 0;
+        countImprocedente = 0;
+        salvarContadores();
+        init(); 
+        limparFeedback();
+        
+        mensagemCopia.textContent = "Contadores resetados para 0 e salvos PERMANENTEMENTE.";
+        mensagemCopia.style.backgroundColor = "#fed7aa";
+        mensagemCopia.style.color = "#c2410c";
+        
+        // Finaliza o estado de confirmação e cooldown
+        isResetConfirmed = false;
+        btnResetar.textContent = 'RESETAR TODOS OS CONTADORES (Precisa de Confirmação)';
+        btnResetar.disabled = false;
+        clearTimeout(resetTimer);
+        resetTimer = null;
+    }
+
+    function resetarContadores() {
+        if (!isResetConfirmed) {
+            // Primeiro clique: Inicia o cooldown e pede confirmação
+            
+            isResetConfirmed = true;
+            btnResetar.disabled = true;
+            let tempoRestante = COOLDOWN_RESET_SECONDS;
+            
+            mensagemCopia.textContent = `Aperte novamente em ${tempoRestante}s para confirmar o RESET.`;
+            mensagemCopia.style.backgroundColor = "#fef08a";
+            mensagemCopia.style.color = "#a16207";
+
+            btnResetar.textContent = `Aguarde para Confirmar (${tempoRestante}s)`;
+
+            const interval = setInterval(() => {
+                tempoRestante--;
+                if (tempoRestante > 0) {
+                    btnResetar.textContent = `Aguarde para Confirmar (${tempoRestante}s)`;
+                    mensagemCopia.textContent = `Aperte novamente em ${tempoRestante}s para confirmar o RESET.`;
+                } else {
+                    clearInterval(interval);
+                    btnResetar.disabled = false;
+                    btnResetar.textContent = 'CLIQUE PARA CONFIRMAR O RESET!';
+                    mensagemCopia.textContent = 'CONFIRME O RESET AGORA!';
+                }
+            }, 1000);
+
+            resetTimer = setTimeout(() => {
+                // Se o usuário não clicou após o cooldown, volta ao estado inicial
+                if (isResetConfirmed) {
+                    isResetConfirmed = false;
+                    btnResetar.textContent = 'RESETAR TODOS OS CONTADORES (Precisa de Confirmação)';
+                    mensagemCopia.textContent = '';
+                    mensagemCopia.style.backgroundColor = "transparent";
+                }
+            }, COOLDOWN_RESET_SECONDS * 1000);
+
+        } else if (btnResetar.disabled === false) {
+            // Segundo clique (após o cooldown): Efetua o reset
+            efetuarReset();
+        }
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('btnProcedente').addEventListener('click', () => alterarContador('procedente', 1));
+    document.getElementById('btnImprocedente').addEventListener('click', () => alterarContador('improcedente', 1));
+    document.getElementById('btnRemoverProcedente').addEventListener('click', () => alterarContador('procedente', -1));
+    document.getElementById('btnRemoverImprocedente').addEventListener('click', () => alterarContador('improcedente', -1));
+    document.getElementById('btnGerarParcial').addEventListener('click', () => gerarRelatorio('PARCIAL'));
+    document.getElementById('btnGerarFinal').addEventListener('click', () => gerarRelatorio('FINAL'));
+    document.getElementById('copiarRelatorio').addEventListener('click', copiarRelatorio);
+    btnResetar.addEventListener('click', resetarContadores);
+
+    // Inicializa a página
+    init();
+</script>
+
+</body>
+</html>
+agemCopia.textContent = '';
                 mensagemCopia.style.backgroundColor = "transparent";
             }, 3000);
         }).catch(err => {
