@@ -518,24 +518,25 @@ IMPROCEDENTES: ${countImprocedente}
         // Primeiro clique: Inicia a espera
         isAwaitingConfirmation = true;
         btnResetar.setAttribute('data-confirm', 'true'); // Ativa o estilo de confirmação
-
-        mensagemCopia.textContent = `⚠️ Clique novamente no botão em ${COOLDOWN_RESET_MS / 1000}s para confirmar a limpeza total.`;
-        mensagemCopia.style.backgroundColor = "#fef08a";
-        mensagemCopia.style.color = "#a16207";
-
+        
+        // NENHUMA MENSAGEM DE FEEDBACK NO PRIMEIRO CLIQUE É EXIBIDA AQUI
+        
         // Expira o estado de confirmação após 5 segundos
         resetTimer = setTimeout(() => {
             isAwaitingConfirmation = false;
             btnResetar.removeAttribute('data-confirm'); // Remove o estilo de confirmação
             
+            // Mensagem de expiração é opcional, mas manter uma indicação de falha
+            // ajuda a entender o comportamento do botão.
+            // Para não exibir NENHUMA mensagem, comentar as linhas abaixo:
             mensagemCopia.textContent = 'Confirmação expirada. Contagem mantida.';
             mensagemCopia.style.backgroundColor = "#fef08a";
             mensagemCopia.style.color = "#a16207";
-            
             setTimeout(() => {
                 mensagemCopia.textContent = '';
                 mensagemCopia.style.backgroundColor = 'transparent';
             }, 3000);
+            
         }, COOLDOWN_RESET_MS);
     }
 
